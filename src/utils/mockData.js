@@ -183,6 +183,34 @@ export const MOCK_ADMIN_COMPLETED_COURSES = [
 ];
 
 // Helper for local storage simulation
+export const getLocalCourses = () => {
+  const stored = localStorage.getItem('mock_courses');
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  localStorage.setItem('mock_courses', JSON.stringify(MOCK_COURSES));
+  return MOCK_COURSES;
+};
+
+export const saveLocalCourse = (courseData) => {
+  const courses = getLocalCourses();
+  const newCourse = {
+    id: Date.now(),
+    ...courseData,
+    image: HERO_AVATARS[Math.floor(Math.random() * HERO_AVATARS.length)].image,
+    lessons: courseData.lessons || []
+  };
+  courses.push(newCourse);
+  localStorage.setItem('mock_courses', JSON.stringify(courses));
+  return newCourse;
+};
+
+export const deleteLocalCourse = (id) => {
+  const courses = getLocalCourses();
+  const filtered = courses.filter(c => c.id !== id);
+  localStorage.setItem('mock_courses', JSON.stringify(filtered));
+};
+
 export const getLocalEnrollments = () => {
   const stored = localStorage.getItem('mock_enrollments');
   return stored ? JSON.parse(stored) : [];
@@ -190,7 +218,7 @@ export const getLocalEnrollments = () => {
 
 export const saveLocalEnrollment = (courseId, style) => {
   const enrollments = getLocalEnrollments();
-  const course = MOCK_COURSES.find(c => c.id === parseInt(courseId));
+  const course = getLocalCourses().find(c => c.id === parseInt(courseId));
   
   if (!enrollments.find(e => e.course_id === parseInt(courseId))) {
     enrollments.push({
@@ -222,7 +250,7 @@ export const markLessonCompleteLocal = (enrollmentId, lessonId, courseId) => {
       enrollment.completed_lessons.push(lessonId);
     }
     
-    const course = MOCK_COURSES.find(c => c.id === parseInt(courseId));
+    const course = getLocalCourses().find(c => c.id === parseInt(courseId));
     const totalLessons = course.lessons.length;
     const completedCount = enrollment.completed_lessons.length;
     
